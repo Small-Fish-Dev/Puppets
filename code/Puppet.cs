@@ -94,6 +94,22 @@ namespace Puppets
 			new Clothes().Dress( this );
 		}
 
+		public void Dress( AnimatedEntity copy )
+		{
+			var clothingContainer = new ClothingContainer();
+
+			foreach ( Entity child in copy.Children )
+			{
+				if ( child is not AnimatedEntity childModel ) return;
+
+				Clothing clothing = new Clothing();
+				clothing.Model = childModel.GetModelName();
+				clothingContainer.Toggle( clothing );
+			}
+
+			clothingContainer.DressEntity( this );
+		}
+
 		[GameEvent.Tick.Server]
 		public void ComputeActing()
 		{
@@ -127,6 +143,17 @@ namespace Puppets
 			var spawnedPuppet = new Puppet();
 			spawnedPuppet.Position = player.Position;
 			spawnedPuppet.Username = username;
+		}
+
+		[ConCmd.Server( "spawn_clone" )]
+		public static void SpawnClone( string username = "default" )
+		{
+			if ( ConsoleSystem.Caller.Pawn is not AnimatedEntity player ) return;
+
+			var spawnedPuppet = new Puppet();
+			spawnedPuppet.Position = player.Position;
+			spawnedPuppet.Username = username == "default" ? player.Client.Name : username;
+			spawnedPuppet.Dress( player );
 		}
 
 		[ConCmd.Server( "toggle_speech" )]
