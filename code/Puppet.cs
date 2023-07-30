@@ -89,7 +89,7 @@ namespace Puppets
 				}
 
 				NameTag.Position = Position + Vector3.Up * 85f;
-				NameTag.Rotation = Rotation.LookAt( Camera.Main.Position - NameTag.Position );
+				NameTag.Rotation = Camera.Main.Rotation.RotateAroundAxis( Vector3.Up, 180 );
 				NameTag.Label.Text = Username;
 				var textSize = Username.Length * 150f;
 				NameTag.PanelBounds = new Rect( 0, 0, textSize, 200 );
