@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace Puppets
 {
@@ -37,10 +38,14 @@ namespace Puppets
 
 		public void Dress( int clothingId = 0 )
 		{
-			/*if ( clothingId == 0 )
-				Clothes.Presets.Ran
-			Clothes.Presets.*/
-			new Clothes().Dress( this );
+			Clothes preset = new Clothes();
+
+			if ( clothingId == 0 )
+				preset = Game.Random.FromArray( Clothes.Presets );
+			else if ( clothingId > 0 )
+				preset = Clothes.Presets[ Math.Max( clothingId - 1, Clothes.Presets.Length - 1 ) ];
+
+			preset.Dress( this );
 		}
 
 		public void Dress( AnimatedEntity copy )

@@ -14,6 +14,8 @@ namespace Puppets
 			spawnedPuppet.Rotation = player.Rotation;
 			spawnedPuppet.Username = username;
 			spawnedPuppet.LooksAtYou = looksAtYou;
+
+			spawnedPuppet.Dress( clothing );
 		}
 
 		[ConCmd.Server( "spawn_clone" )]
