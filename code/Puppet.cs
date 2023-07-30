@@ -58,9 +58,9 @@ namespace Puppets
 		[Net] public string Username { get; private set; } = "Anonymous";
 		public NameTag NameTag { get; private set; }
 		public bool IsTalking { get; private set; } = false;
-		[Net] public int Identifier { get; private set; } = 0;
-		public Vector3 Target => ( Game.Clients.FirstOrDefault().Pawn?.Position ?? Vector3.Zero );
-		public Rotation WishRotation => Rotation.LookAt( (Target - Position).WithZ( 0 ).Normal, Vector3.Up );
+		public int Identifier { get; private set; } = 0;
+		public bool LooksAtYou { get; private set; } = false;
+		public Vector3 Target => Game.Clients.FirstOrDefault().Pawn?.Position ?? Rotation.Forward;
 
 		public Puppet() { }
 		
@@ -113,10 +113,11 @@ namespace Puppets
 		[GameEvent.Tick.Server]
 		public void ComputeActing()
 		{
-			Rotation = Rotation.Slerp( Rotation, WishRotation, Time.Delta * 2f );
-			
-			var animationHelper = new CitizenAnimationHelper( this );
-			animationHelper.WithLookAt( Target );
+			if ( LooksAtYou )
+			{
+				var animationHelper = new CitizenAnimationHelper( this );
+				animationHelper.WithLookAt( Target );
+			}
 
 			if ( Time.Tick % 4 == 0 )
 				SetAnimParameter( "voice", IsTalking ? Game.Random.Float( 0, 1 ) : 0 );
@@ -127,8 +128,14 @@ namespace Puppets
 		{
 			if ( NameTag != null )
 			{
+				if ( Username == "none" )
+				{
+					NameTag.Delete();
+					return;
+				}
+
 				NameTag.Position = Position + Vector3.Up * 85f;
-				NameTag.Rotation = WishRotation;
+				NameTag.Rotation = Rotation.LookAt( Camera.Main.Position - NameTag.Position );
 				NameTag.Label.Text = Username;
 				var textSize = Username.Length * 150f;
 				NameTag.PanelBounds = new Rect( 0, 0, textSize, 200 );
@@ -136,23 +143,28 @@ namespace Puppets
 		}
 
 		[ConCmd.Server( "spawn_puppet" )]
-		public static void SpawnPuppet( string username = "Anonymous", int clothing = 0 )
+		public static void SpawnPuppet( string username = "Anonymous", bool looksAtYou = true, int clothing = 0 )
 		{
 			if ( ConsoleSystem.Caller.Pawn is not AnimatedEntity player ) return;
 
 			var spawnedPuppet = new Puppet();
 			spawnedPuppet.Position = player.Position;
+			spawnedPuppet.Rotation = player.Rotation;
 			spawnedPuppet.Username = username;
+			spawnedPuppet.LooksAtYou = looksAtYou;
 		}
 
 		[ConCmd.Server( "spawn_clone" )]
-		public static void SpawnClone( string username = "default" )
+		public static void SpawnClone( string username = "default", bool looksAtYou = true )
 		{
 			if ( ConsoleSystem.Caller.Pawn is not AnimatedEntity player ) return;
 
 			var spawnedPuppet = new Puppet();
 			spawnedPuppet.Position = player.Position;
+			spawnedPuppet.Rotation = player.Rotation;
 			spawnedPuppet.Username = username == "default" ? player.Client.Name : username;
+			spawnedPuppet.LooksAtYou = looksAtYou;
+
 			spawnedPuppet.Dress( player );
 		}
 
