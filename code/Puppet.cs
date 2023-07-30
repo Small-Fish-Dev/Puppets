@@ -142,6 +142,13 @@ namespace Puppets
 			}
 		}
 
+		protected override void OnDestroy()
+		{
+			base.OnDestroy();
+
+			NameTag?.Delete();
+		}
+
 		[ConCmd.Server( "spawn_puppet" )]
 		public static void SpawnPuppet( string username = "Anonymous", bool looksAtYou = true, int clothing = 0 )
 		{
@@ -175,6 +182,14 @@ namespace Puppets
 
 			if ( puppet != null )
 				puppet.IsTalking = !puppet.IsTalking;
+		}
+
+		[ConCmd.Server( "undo_puppet" )]
+		public static void UndoPuppet()
+		{
+			var target = Entity.All.OfType<Puppet>().OrderBy( x => x.Identifier ).LastOrDefault();
+			if ( target != null )
+				target.Delete();
 		}
 	}
 
