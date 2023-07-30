@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Sandbox;
 using Sandbox.UI;
+using Sandbox.UI.Construct;
 
 namespace Puppets
 {
@@ -45,24 +46,52 @@ namespace Puppets
 
 			container.DressEntity( target );
 		}
+
+		public static Clothes[] Presets { get; private set; } = new Clothes[]
+		{
+			new Clothes()
+		};
 	}
 
 	public partial class Puppet : AnimatedEntity
 	{
-		public string Username { get; private set; } = "Anonymous";
+		[Net] public string Username { get; private set; } = "Anonymous";
+		public NameTag NameTag { get; private set; }
 		public bool IsTalking { get; private set; } = false;
-		public int Identifier { get; private set; } = 0;
+		[Net] public int Identifier { get; private set; } = 0;
 		public Vector3 Target => ( Game.Clients.FirstOrDefault().Pawn?.Position ?? Vector3.Zero );
 		public Rotation WishRotation => Rotation.LookAt( (Target - Position).WithZ( 0 ).Normal, Vector3.Up );
+
+		public Puppet() { }
+		
+		public Puppet( string username )
+		{
+			Username = username;
+		}
 
 		public override void Spawn()
 		{
 			base.Spawn();
 
 			SetModel( "models/citizen/citizen.vmdl" );
-			new Clothes().Dress( this );
 
 			Identifier = Entity.All.OfType<Puppet>().Count();
+		}
+
+		public override void ClientSpawn()
+		{
+			base.ClientSpawn();
+
+			NameTag = new NameTag();
+			NameTag.Position = Position + Vector3.Up * 76f;
+		}
+
+		public void Dress( int clothingId = 0 )
+		{
+			/*if ( clothingId == 0 )
+				Clothes.Presets.Ran
+			Clothes.Presets.*/
+			new Clothes().Dress( this );
 		}
 
 		[GameEvent.Tick.Server]
@@ -77,13 +106,27 @@ namespace Puppets
 				SetAnimParameter( "voice", IsTalking ? Game.Random.Float( 0, 1 ) : 0 );
 		}
 
+		[GameEvent.Client.Frame]
+		public void MoveNameTag()
+		{
+			if ( NameTag != null )
+			{
+				NameTag.Position = Position + Vector3.Up * 85f;
+				NameTag.Rotation = WishRotation;
+				NameTag.Label.Text = Username;
+				var textSize = Username.Length * 150f;
+				NameTag.PanelBounds = new Rect( 0, 0, textSize, 200 );
+			}
+		}
+
 		[ConCmd.Server( "spawn_puppet" )]
-		public static void SpawnPuppet()
+		public static void SpawnPuppet( string username = "Anonymous", int clothing = 0 )
 		{
 			if ( ConsoleSystem.Caller.Pawn is not AnimatedEntity player ) return;
 
 			var spawnedPuppet = new Puppet();
 			spawnedPuppet.Position = player.Position;
+			spawnedPuppet.Username = username;
 		}
 
 		[ConCmd.Server( "toggle_speech" )]
@@ -93,6 +136,17 @@ namespace Puppets
 
 			if ( puppet != null )
 				puppet.IsTalking = !puppet.IsTalking;
+		}
+	}
+
+	public class NameTag : WorldPanel
+	{
+		public Label Label { get; set; }
+
+		public NameTag()
+		{
+			StyleSheet.Load( "Style.scss" );
+			Label = Add.Label( "Anonymous", "NameTag" );
 		}
 	}
 }
