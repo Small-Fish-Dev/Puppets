@@ -43,7 +43,7 @@ namespace Puppets
 			if ( clothingId == 0 )
 				preset = Game.Random.FromArray( Clothes.Presets );
 			else if ( clothingId > 0 )
-				preset = Clothes.Presets[ Math.Max( clothingId - 1, Clothes.Presets.Length - 1 ) ];
+				preset = Clothes.Presets[ Math.Clamp( clothingId - 1, 0, Clothes.Presets.Length - 1 ) ];
 
 			preset.Dress( this );
 		}
