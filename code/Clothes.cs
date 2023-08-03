@@ -115,6 +115,24 @@ namespace Puppets
 				"models/citizen_clothes/hair/scruffy_beard/scruffy_beard_grey.clothing" ,
 				"models/citizen_clothes/shoes/smartshoes/smartshoes.clothing"
 			} ),
+			new Clothes( new List<string>()
+			{
+				"models/citizen_clothes/skin03.clothing",
+				"models/citizen_clothes/hair/eyebrows_drawn/eyebrows_drawn.clothing",
+				"models/citizen_clothes/shirt/tshirt/tshirt.clothing",
+				"models/citizen_clothes/trousers/loosejeans/loose_jeans.clothing",
+				"models/citizen_clothes/gloves/tactical_gloves/tactical_gloves.clothing",
+				"models/citizen_clothes/hair/hair_fade/hair_fade.clothing"
+			} ),
+			new Clothes( new List<string>()
+			{
+				"models/citizen_clothes/skin02.clothing",
+				"models/citizen_clothes/hair/hair_shortscruffy/hair_shortscruffy_black.clothing",
+				"models/citizen_clothes/hair/eyebrows/eyebrows_black.clothing",
+				"models/citizen_clothes/trousers/cardboardtrousers/cardboard_trousers.clothing",
+				"models/citizen_clothes/hair/decorated_beard/decorated_beard_black.clothing" ,
+				"models/citizen_clothes/shoes/crocs_and_socks/clogs_and_socks.clothing"
+			} )
 
 		};
 	}
